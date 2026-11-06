@@ -63,7 +63,7 @@ export async function createRequest(input: unknown): Promise<CreateRequestResult
   // Rattache la demande à une fiche client existante (même e-mail), sans en créer de nouvelle ici.
   const { data: existingClient } = await db.from("clients").select("id").eq("email", data.email).maybeSingle();
 
-  const row = {
+  const row: Record<string, unknown> = {
     kind: data.kind,
     client_id: existingClient?.id ?? null,
     first_name: data.firstName,
@@ -76,10 +76,16 @@ export async function createRequest(input: unknown): Promise<CreateRequestResult
     description: data.description,
     consent_at: new Date().toISOString(),
     ip_hash: ipHash,
-    ...(data.kind === "devis"
-      ? { client_type: data.clientType, building_type: data.buildingType, service: data.service }
-      : { failure_nature: data.failureNature, urgency: data.urgency, service: "depannage" as const }),
   };
+  if (data.kind === "devis") {
+    row.client_type = data.clientType;
+    row.building_type = data.buildingType;
+    row.service = data.service;
+  } else {
+    row.failure_nature = data.failureNature;
+    row.urgency = data.urgency;
+    row.service = "depannage";
+  }
 
   const { data: inserted, error } = await db.from("requests").insert(row).select("id").single();
   if (error || !inserted) {
