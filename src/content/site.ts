@@ -257,6 +257,12 @@ export const realisations: Realisation[] = [
     caption: "Armoire de distribution électrique",
     focus: "50% 30%",
   },
+  {
+    src: "/images/realisations/boutique-spots.jpg",
+    alt: "Électricien sur un escabeau posant des spots encastrés au plafond d'une boutique",
+    caption: "Pose de spots encastrés en boutique",
+    focus: "50% 38%",
+  },
   { src: "/images/realisations/restaurant-bar.jpg", alt: "Bar d'un restaurant éclairé par des néons et des plafonniers", caption: "Éclairage d'un restaurant" },
   { src: "/images/realisations/showroom-plans.jpg", alt: "Showroom de cuisines équipé de spots sur rail", caption: "Éclairage d'un showroom" },
   { src: "/images/realisations/bureau-panneau-led.jpg", alt: "Bureau équipé d'un panneau LED au plafond", caption: "Panneau LED dans un bureau" },
