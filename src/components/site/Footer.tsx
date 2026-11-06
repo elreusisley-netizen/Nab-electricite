@@ -43,9 +43,10 @@ export function Footer() {
       <div className="border-t border-white/10">
         <div className="mx-auto flex max-w-6xl flex-wrap justify-between gap-3 px-4 py-5 sm:px-6">
           <span>© {new Date().getFullYear()} EURL {company.legalName}</span>
-          <span className="flex gap-6">
+          <span className="flex flex-wrap gap-x-6 gap-y-2">
             <Link href="/mentions-legales" className="hover:text-white">Mentions légales</Link>
             <Link href="/politique-de-confidentialite" className="hover:text-white">Politique de confidentialité</Link>
+            <a href="/admin" className="hover:text-white">Espace admin</a>
           </span>
         </div>
       </div>
