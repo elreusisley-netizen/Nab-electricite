@@ -1,13 +1,14 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { supabasePublishableKey, supabaseUrl } from "@/lib/env";
 
 type CookieToSet = { name: string; value: string; options: CookieOptions };
 
 // Protège /admin : rafraîchit la session Supabase et renvoie vers la connexion si besoin.
 // Le rôle administrateur est revérifié côté serveur dans chaque page et action, et par la RLS.
 export async function middleware(request: NextRequest) {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  const url = supabaseUrl;
+  const key = supabasePublishableKey;
   const isLogin = request.nextUrl.pathname.startsWith("/admin/connexion");
 
   if (!url || !key) {
