@@ -14,11 +14,17 @@ export async function signIn(formData: FormData) {
     email: formData.get("email"),
     password: formData.get("password"),
   });
-  if (!parsed.success) redirect("/admin/connexion?erreur=identifiants");
+  if (!parsed.success) redirect("/admin/connexion?erreur=format");
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
-  if (error) redirect("/admin/connexion?erreur=identifiants");
+  if (error) {
+    // Visible dans Vercel > Logs (jamais le mot de passe).
+    console.error("[connexion admin]", error.code ?? "", error.status ?? "", error.message);
+    if (error.code === "email_not_confirmed") redirect("/admin/connexion?erreur=non-confirme");
+    if (error.code === "invalid_credentials") redirect("/admin/connexion?erreur=identifiants");
+    redirect("/admin/connexion?erreur=technique");
+  }
 
   redirect("/admin");
 }

@@ -2,6 +2,9 @@ import { signIn } from "../actions";
 
 const messages: Record<string, string> = {
   identifiants: "E-mail ou mot de passe incorrect.",
+  format: "E-mail invalide ou mot de passe trop court (8 caractères minimum).",
+  "non-confirme": "Ce compte n'est pas encore confirmé dans Supabase.",
+  technique: "Connexion à Supabase impossible : vérifier les clés dans Vercel.",
   acces: "Ce compte n'a pas accès à l'administration.",
 };
 
