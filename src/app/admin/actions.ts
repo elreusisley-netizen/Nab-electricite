@@ -23,7 +23,8 @@ export async function signIn(formData: FormData) {
     console.error("[connexion admin]", error.code ?? "", error.status ?? "", error.message);
     if (error.code === "email_not_confirmed") redirect("/admin/connexion?erreur=non-confirme");
     if (error.code === "invalid_credentials") redirect("/admin/connexion?erreur=identifiants");
-    redirect("/admin/connexion?erreur=technique");
+    const detail = [error.code, error.status, error.message].filter(Boolean).join(" · ").slice(0, 160);
+    redirect(`/admin/connexion?erreur=technique&detail=${encodeURIComponent(detail)}`);
   }
 
   redirect("/admin");

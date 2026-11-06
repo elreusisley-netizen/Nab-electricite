@@ -11,9 +11,9 @@ const messages: Record<string, string> = {
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ erreur?: string }>;
+  searchParams: Promise<{ erreur?: string; detail?: string }>;
 }) {
-  const { erreur } = await searchParams;
+  const { erreur, detail } = await searchParams;
   const message = erreur ? messages[erreur] : undefined;
 
   return (
@@ -25,6 +25,9 @@ export default async function LoginPage({
         {message ? (
           <p role="alert" className="mt-6 rounded-lg bg-rouge/10 px-4 py-3 text-sm text-rouge-fonce">
             {message}
+            {erreur === "technique" && detail ? (
+              <span className="mt-2 block break-words font-mono text-xs">Détail : {detail}</span>
+            ) : null}
           </p>
         ) : null}
 
