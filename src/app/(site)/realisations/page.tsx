@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Image from "next/image";
+import { RealisationMedia } from "@/components/site/RealisationMedia";
 import { ButtonLink, Container, PageHero } from "@/components/site/ui";
 import { getRealisations } from "@/lib/content";
 
@@ -17,22 +17,14 @@ export default function RealisationsPage() {
       <PageHero
         eyebrow="Réalisations"
         title="Nos chantiers en images"
-        intro="Commerces, restaurants, bureaux et logements : quelques-unes de nos interventions."
+        intro="Commerces, restaurants, bureaux et logements : quelques-unes de nos interventions, en photos et en vidéo."
       />
       <section>
         <Container className="py-20">
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {realisations.map((r) => (
               <figure key={r.src}>
-                <div className="relative h-72 overflow-hidden rounded-xl bg-fond">
-                  <Image
-                    src={r.src}
-                    alt={r.alt}
-                    fill
-                    sizes="(min-width: 1024px) 360px, (min-width: 640px) 50vw, 100vw"
-                    className="object-cover"
-                  />
-                </div>
+                <RealisationMedia r={r} heightClass="h-72" sizes="(min-width: 1024px) 360px, (min-width: 640px) 50vw, 100vw" />
                 <figcaption className="mt-3 font-semibold text-nuit">{r.caption}</figcaption>
               </figure>
             ))}

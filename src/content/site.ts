@@ -235,7 +235,9 @@ export const services: Service[] = [
 ];
 
 export type Realisation = {
-  src: string;
+  src: string; // photo, ou image d'aperçu quand il s'agit d'une vidéo
+  video?: string;
+  focus?: string; // cadrage de la photo, ex. "50% 30%"
   alt: string;
   caption: string;
   service?: string; // slug de la prestation liée
@@ -243,6 +245,18 @@ export type Realisation = {
 
 // Photos de chantiers de l'entreprise. Légendes descriptives, sans nom de client ni ville.
 export const realisations: Realisation[] = [
+  {
+    src: "/videos/debrief-fin-de-chantier.jpg",
+    video: "/videos/debrief-fin-de-chantier.mp4",
+    alt: "Vidéo de visite d'un chantier terminé : immeuble rénové, logements et équipements électriques",
+    caption: "Débrief de fin de chantier (vidéo)",
+  },
+  {
+    src: "/images/realisations/armoire-electrique.jpg",
+    alt: "Électricien devant une armoire de distribution électrique ouverte",
+    caption: "Armoire de distribution électrique",
+    focus: "50% 30%",
+  },
   { src: "/images/realisations/restaurant-bar.jpg", alt: "Bar d'un restaurant éclairé par des néons et des plafonniers", caption: "Éclairage d'un restaurant" },
   { src: "/images/realisations/showroom-plans.jpg", alt: "Showroom de cuisines équipé de spots sur rail", caption: "Éclairage d'un showroom" },
   { src: "/images/realisations/bureau-panneau-led.jpg", alt: "Bureau équipé d'un panneau LED au plafond", caption: "Panneau LED dans un bureau" },

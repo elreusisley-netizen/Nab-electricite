@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Icon } from "@/components/icons";
+import { RealisationMedia } from "@/components/site/RealisationMedia";
 import { ButtonLink, ContactChoices, Container, DepannageBand, Eyebrow, H2 } from "@/components/site/ui";
 import { getCompany, getDepartments, getRealisations, getReferences, getServices } from "@/lib/content";
 
@@ -180,9 +181,7 @@ export default function HomePage() {
           <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {realisations.map((r) => (
               <figure key={r.src}>
-                <div className="relative h-60 overflow-hidden rounded-xl">
-                  <Image src={r.src} alt={r.alt} fill sizes="(min-width: 1024px) 270px, (min-width: 640px) 50vw, 100vw" className="object-cover" />
-                </div>
+                <RealisationMedia r={r} heightClass="h-60" sizes="(min-width: 1024px) 270px, (min-width: 640px) 50vw, 100vw" />
                 <figcaption className="mt-3 font-semibold text-nuit">{r.caption}</figcaption>
               </figure>
             ))}
