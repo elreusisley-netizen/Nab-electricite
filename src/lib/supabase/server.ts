@@ -7,8 +7,9 @@ import { assertSupabaseEnv, supabasePublishableKey, supabaseUrl } from "@/lib/en
 
 // Client lié à la session de l'utilisateur connecté : les politiques RLS s'appliquent.
 export async function createClient() {
-  assertSupabaseEnv();
+  // cookies() en premier : la page devient dynamique, jamais pré-générée au build.
   const cookieStore = await cookies();
+  assertSupabaseEnv();
 
   return createServerClient(supabaseUrl, supabasePublishableKey, {
     cookies: {
