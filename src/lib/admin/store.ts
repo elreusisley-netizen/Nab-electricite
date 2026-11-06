@@ -90,6 +90,16 @@ export function clientName(c: { type: string; firstName: string | null; lastName
   return [c.firstName, c.lastName].filter(Boolean).join(" ") || c.companyName || "Client";
 }
 
+export interface VisitStats {
+  views: number;
+  visitors: number;
+  today: number;
+  days: { day: string; views: number; visitors: number }[];
+  pages: { label: string; value: number }[];
+  sources: { label: string; value: number }[];
+  devices: { label: string; value: number }[];
+}
+
 export function createAdminStore(sb: SupabaseClient = getBrowserClient()) {
   async function upsertClient(input: SlotInput): Promise<string> {
     const row = {
@@ -154,6 +164,12 @@ export function createAdminStore(sb: SupabaseClient = getBrowserClient()) {
   }
 
   return {
+    async visitStats(since: string | null): Promise<VisitStats> {
+      const { data, error } = await sb.rpc("visit_stats", { p_since: since });
+      fail(error);
+      return data as VisitStats;
+    },
+
     async signOut() {
       await sb.auth.signOut();
     },

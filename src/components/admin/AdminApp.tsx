@@ -259,9 +259,9 @@ export function AdminApp({ email }: { email: string }) {
     <div className="min-h-svh bg-fond pb-24 md:pb-10">
       <header className="sticky top-0 z-30 border-b border-ligne bg-white/95 backdrop-blur-sm">
         <div className="mx-auto flex h-15 max-w-6xl items-center justify-between gap-4 px-4 md:h-17 md:px-8">
-          <div className="flex items-center gap-3">
-            <Image src="/images/logo-ampoule.png" alt="Électricité N.A.B." width={40} height={38} className="h-10 w-auto" />
-            <span className="font-titre text-2xl leading-none font-bold text-nuit">{viewTitle}</span>
+          <div className="flex min-w-0 items-center gap-3">
+            <Image src="/images/logo-ampoule.png" alt="Électricité N.A.B." width={40} height={38} className="h-9 w-auto shrink-0 md:h-10" />
+            <span className="truncate font-titre text-xl leading-none md:text-2xl font-bold text-nuit">{viewTitle}</span>
           </div>
           <nav aria-label="Sections" className="hidden items-center gap-1 md:flex">
             {tabs.map((t) => (
@@ -278,7 +278,7 @@ export function AdminApp({ email }: { email: string }) {
             ))}
             <a href="/" className="ml-3 text-sm text-discret underline underline-offset-4">Voir le site</a>
           </nav>
-          <div className="flex items-center gap-3">
+          <div className="flex shrink-0 items-center gap-3">
             <button
               type="button"
               onClick={() => setEditing(emptySlot(todayISO()))}

@@ -1,6 +1,7 @@
 import { Footer } from "@/components/site/Footer";
 import { Header } from "@/components/site/Header";
 import { MobileCallBar } from "@/components/site/MobileCallBar";
+import { VisitTracker } from "@/components/site/VisitTracker";
 import { company, departments, services, siteUrl } from "@/content/site";
 
 // Données structurées pour le référencement local (Schema.org Electrician).
@@ -54,6 +55,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
       <main id="contenu">{children}</main>
       <Footer />
       <MobileCallBar />
+      <VisitTracker />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
     </>
   );

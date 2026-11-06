@@ -70,6 +70,18 @@ export default function PrivacyPage() {
           </div>
 
           <div>
+            <h2>Mesure d&apos;audience</h2>
+            <p>
+              Pour connaître la fréquentation du site, nous comptons les pages consultées, sans cookie et sans conserver
+              votre adresse IP : chaque visite est rendue anonyme par un code qui change tous les jours, ce qui empêche de
+              vous suivre d&apos;une journée à l&apos;autre. Nous enregistrons seulement la page vue, la date, le type
+              d&apos;appareil et le site d&apos;origine (par exemple Google). Ces statistiques sont conservées 13 mois au
+              maximum et ne sont pas partagées. Si votre navigateur envoie un signal « Do Not Track » ou « Global Privacy
+              Control », votre visite n&apos;est pas comptée.
+            </p>
+          </div>
+
+          <div>
             <h2>Vos droits</h2>
             <p>
               Vous pouvez accéder à vos données, les rectifier, les effacer, en limiter le traitement ou vous y opposer,
