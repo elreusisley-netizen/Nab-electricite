@@ -3,21 +3,27 @@
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { todayISO } from "@/lib/admin/dates";
+import { createCommercialStore, type CommercialStore, type QuoteRow } from "@/lib/admin/commercial";
 import { createAdminStore, type AdminStore } from "@/lib/admin/store";
 import { emptySlot, type AgendaItem, type RequestItem, type SlotInput } from "@/lib/admin/types";
-import type { RequestStatus } from "@/lib/labels";
-import { AccountsView } from "./AccountsView";
+import { allServices, type RequestStatus } from "@/lib/labels";
 import { AgendaView } from "./AgendaView";
+import { ClientsView } from "./ClientsView";
+import { QuoteEditor, type QuoteEditorTarget } from "./QuoteEditor";
+import { QuotesView } from "./QuotesView";
 import { RequestsView } from "./RequestsView";
+import { SettingsView } from "./SettingsView";
 import { SlotSheet } from "./SlotSheet";
 import { StatsView } from "./StatsView";
 
-type View = "agenda" | "demandes" | "statistiques" | "comptes";
+type View = "agenda" | "demandes" | "devis" | "clients" | "statistiques" | "reglages";
+const VIEWS: View[] = ["agenda", "demandes", "devis", "clients", "statistiques", "reglages"];
 
 function readView(): View {
   if (typeof window === "undefined") return "agenda";
   const v = new URLSearchParams(window.location.search).get("vue");
-  return v === "demandes" || v === "statistiques" || v === "comptes" ? v : "agenda";
+  if (v === "comptes") return "reglages";
+  return VIEWS.includes(v as View) ? (v as View) : "agenda";
 }
 
 function toInput(item: AgendaItem): SlotInput {
@@ -52,6 +58,10 @@ function toInput(item: AgendaItem): SlotInput {
 
 export function AdminApp({ email }: { email: string }) {
   const store = useMemo<AdminStore>(() => createAdminStore(), []);
+  const commercial = useMemo<CommercialStore>(() => createCommercialStore(), []);
+  const [quoteTarget, setQuoteTarget] = useState<QuoteEditorTarget | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [openClientId, setOpenClientId] = useState<string | null>(null);
   const [view, setView] = useState<View>("agenda");
   const [items, setItems] = useState<AgendaItem[]>([]);
   const [requests, setRequests] = useState<RequestItem[]>([]);
@@ -153,6 +163,77 @@ export function AdminApp({ email }: { email: string }) {
       city: r.city,
     });
 
+  // Demande de devis → fiche client (retrouvée par e-mail ou téléphone, sinon créée) → nouveau devis.
+  const quoteFromRequest = async (r: RequestItem) => {
+    try {
+      let clientId = r.clientId;
+      if (!clientId) {
+        const clients = await commercial.listClients();
+        const phone = r.phone.replace(/\D/g, "").slice(-9);
+        clientId =
+          clients.find((c) => (r.email && c.email === r.email.toLowerCase()) || (phone && c.phone?.replace(/\D/g, "").endsWith(phone)))?.id ?? null;
+        if (!clientId) {
+          clientId = await commercial.saveClient({
+            type: r.clientType ?? "particulier",
+            firstName: r.firstName,
+            lastName: r.lastName,
+            companyName: "",
+            siret: "",
+            email: r.email,
+            phone: r.phone,
+            internalNotes: "",
+          });
+        }
+        if (r.addressLine && /^\d{5}$/.test(r.postalCode)) {
+          const sites = await commercial.listSites(clientId);
+          if (!sites.some((s) => s.addressLine === r.addressLine.trim())) {
+            await commercial.saveSite(clientId, { addressLine: r.addressLine, postalCode: r.postalCode, city: r.city });
+          }
+        }
+      }
+      setQuoteTarget({
+        mode: "new",
+        clientId,
+        requestId: r.id,
+        title: r.service ? `${allServices[r.service]}` : "",
+        notes: `Demande du site : ${r.description}`,
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Impossible de préparer le devis.");
+    }
+  };
+
+  // Devis accepté → fiche d'intervention préremplie dans l'agenda.
+  const scheduleQuote = async (q: QuoteRow) => {
+    try {
+      const [clients, sites] = await Promise.all([commercial.listClients(), commercial.listSites(q.clientId)]);
+      const c = clients.find((x) => x.id === q.clientId);
+      const site = sites.find((x) => x.id === q.siteId) ?? sites[0];
+      setQuoteTarget(null);
+      goto("agenda");
+      setEditing({
+        ...emptySlot(todayISO()),
+        quoteId: q.id,
+        requestId: q.requestId,
+        clientId: q.clientId,
+        siteId: site?.id,
+        title: q.title ?? `Devis ${q.number ?? ""}`.trim(),
+        description: q.number ? `Travaux du devis ${q.number}` : "",
+        clientType: c?.type ?? "particulier",
+        firstName: c?.firstName ?? "",
+        lastName: c?.lastName ?? "",
+        companyName: c?.companyName ?? "",
+        phone: c?.phone ?? "",
+        email: c?.email ?? "",
+        addressLine: site?.addressLine ?? "",
+        postalCode: site?.postalCode ?? "",
+        city: site?.city ?? "",
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Impossible de préparer l'intervention.");
+    }
+  };
+
   const signOut = async () => {
     await store.signOut();
     window.location.href = "/admin/connexion";
@@ -161,8 +242,11 @@ export function AdminApp({ email }: { email: string }) {
   const tabs: { key: View; label: string; badge?: number }[] = [
     { key: "agenda", label: "Agenda" },
     { key: "demandes", label: "Demandes", badge: newRequests },
-    { key: "statistiques", label: "Statistiques" },
+    { key: "devis", label: "Devis" },
+    { key: "clients", label: "Clients" },
+    { key: "statistiques", label: "Stats" },
   ];
+  const viewTitle = view === "reglages" ? "Réglages" : view === "statistiques" ? "Statistiques" : tabs.find((t) => t.key === view)?.label;
 
   const summary = [
     { label: "Nouvelles demandes", value: newRequests, alert: false, go: "demandes" as View },
@@ -177,7 +261,7 @@ export function AdminApp({ email }: { email: string }) {
         <div className="mx-auto flex h-15 max-w-6xl items-center justify-between gap-4 px-4 md:h-17 md:px-8">
           <div className="flex items-center gap-3">
             <Image src="/images/logo-ampoule.png" alt="Électricité N.A.B." width={40} height={38} className="h-10 w-auto" />
-            <span className="font-titre text-2xl leading-none font-bold text-nuit">{view === "comptes" ? "Comptes" : tabs.find((t) => t.key === view)?.label}</span>
+            <span className="font-titre text-2xl leading-none font-bold text-nuit">{viewTitle}</span>
           </div>
           <nav aria-label="Sections" className="hidden items-center gap-1 md:flex">
             {tabs.map((t) => (
@@ -198,17 +282,20 @@ export function AdminApp({ email }: { email: string }) {
             <button
               type="button"
               onClick={() => setEditing(emptySlot(todayISO()))}
-              className="hidden min-h-10 rounded-full bg-nuit px-5 text-sm text-white md:inline-flex md:items-center"
+              className="hidden min-h-10 rounded-full bg-nuit px-5 text-sm text-white lg:inline-flex lg:items-center"
             >
               + Nouvelle intervention
             </button>
+            <a href="/" className="min-h-10 content-center text-sm text-discret underline underline-offset-4 md:hidden">
+              Site
+            </a>
             <button
               type="button"
-              onClick={() => goto("comptes")}
-              aria-current={view === "comptes" ? "page" : undefined}
-              className={`min-h-10 text-sm underline-offset-4 ${view === "comptes" ? "font-semibold text-nuit underline" : "text-discret underline"}`}
+              onClick={() => goto("reglages")}
+              aria-current={view === "reglages" ? "page" : undefined}
+              className={`min-h-10 text-sm underline-offset-4 ${view === "reglages" ? "font-semibold text-nuit underline" : "text-discret underline"}`}
             >
-              Comptes
+              Réglages
             </button>
             <button type="button" onClick={signOut} className="min-h-10 text-sm text-discret underline underline-offset-4" title={email}>
               Déconnexion
@@ -256,9 +343,21 @@ export function AdminApp({ email }: { email: string }) {
             </div>
           </>
         ) : view === "demandes" ? (
-          <RequestsView requests={requests} onStatus={setStatus} onSchedule={schedule} />
-        ) : view === "comptes" ? (
-          <AccountsView onToast={setToast} />
+          <RequestsView requests={requests} onStatus={setStatus} onSchedule={schedule} onQuote={quoteFromRequest} />
+        ) : view === "devis" ? (
+          <QuotesView store={commercial} refreshKey={refreshKey} onOpen={(id) => setQuoteTarget({ mode: "open", id })} onNew={() => setQuoteTarget({ mode: "new" })} />
+        ) : view === "clients" ? (
+          <ClientsView
+            store={commercial}
+            refreshKey={refreshKey}
+            openClientId={openClientId}
+            onOpened={() => setOpenClientId(null)}
+            onNewQuote={(clientId) => setQuoteTarget({ mode: "new", clientId })}
+            onOpenQuote={(id) => setQuoteTarget({ mode: "open", id })}
+            onToast={setToast}
+          />
+        ) : view === "reglages" ? (
+          <SettingsView store={commercial} onToast={setToast} />
         ) : (
           <StatsView store={store} requests={requests} />
         )}
@@ -276,14 +375,14 @@ export function AdminApp({ email }: { email: string }) {
       ) : null}
 
       <nav aria-label="Sections" className="fixed inset-x-0 bottom-0 z-30 border-t border-ligne bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-sm md:hidden">
-        <ul className="grid grid-cols-4">
+        <ul className="grid grid-cols-5">
           {tabs.map((t) => (
             <li key={t.key}>
               <button
                 type="button"
                 onClick={() => goto(t.key)}
                 aria-current={view === t.key ? "page" : undefined}
-                className={`relative flex h-16 w-full flex-col items-center justify-center gap-1 text-[0.8rem] ${view === t.key ? "text-nuit" : "text-discret"}`}
+                className={`relative flex h-16 w-full flex-col items-center justify-center gap-1 text-[0.75rem] ${view === t.key ? "text-nuit" : "text-discret"}`}
               >
                 <span className={`h-0.5 w-6 rounded-full ${view === t.key ? "bg-nuit" : "bg-transparent"}`} />
                 {t.label}
@@ -293,14 +392,20 @@ export function AdminApp({ email }: { email: string }) {
               </button>
             </li>
           ))}
-          <li>
-            <a href="/" className="flex h-16 w-full flex-col items-center justify-center gap-1 text-[0.8rem] text-discret">
-              <span className="h-0.5 w-6" />
-              Le site
-            </a>
-          </li>
         </ul>
       </nav>
+
+      <QuoteEditor
+        store={commercial}
+        target={quoteTarget}
+        onClose={() => setQuoteTarget(null)}
+        onChanged={() => {
+          setRefreshKey((k) => k + 1);
+          load();
+        }}
+        onToast={setToast}
+        onSchedule={scheduleQuote}
+      />
 
       <SlotSheet initial={editing} onClose={() => setEditing(null)} onSave={save} onDelete={remove} />
 

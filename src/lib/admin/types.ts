@@ -61,6 +61,7 @@ export interface SlotInput {
   clientId?: string;
   siteId?: string;
   requestId?: string | null;
+  quoteId?: string | null;
   title: string;
   service: ServiceKey | "";
   status: InterventionStatus;

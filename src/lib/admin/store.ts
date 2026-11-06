@@ -194,6 +194,7 @@ export function createAdminStore(sb: SupabaseClient = getBrowserClient()) {
         client_id: clientId,
         site_id: siteId,
         request_id: input.requestId ?? null,
+        ...(input.quoteId ? { quote_id: input.quoteId } : {}),
         service: input.service,
         title: input.title.trim() || "Intervention",
         description: nullIfEmpty(input.description),
