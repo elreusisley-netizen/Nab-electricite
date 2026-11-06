@@ -18,7 +18,7 @@ export const company = {
   phone: "06 66 61 43 73",
   phoneHref: "tel:+33666614373",
   phoneIntl: "+33666614373",
-  email: "nabelectricite@gmail.com",
+  email: "infos.eurlnab@gmail.com",
   serviceArea: "Nouvelle-Aquitaine",
   // Champs à compléter (affichés « à compléter » tant qu'ils sont vides)
   shareCapital: null as string | null,
