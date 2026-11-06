@@ -1,0 +1,30 @@
+@import "tailwindcss";
+
+/* Charte Électricité N.A.B. : bleu nuit, blanc, rouge en accent. */
+@theme {
+  --color-nuit: #0e2240;
+  --color-nuit-fonce: #0a1a33;
+  --color-nuit-clair: #1c3357;
+  --color-rouge: #d2232a;
+  --color-rouge-fonce: #b81d24;
+  --color-fond: #f3f5f8;
+  --color-ligne: #e3e7ee;
+  --color-encre: #1b2433;
+  --color-texte: #3d4757;
+  --color-discret: #5a6577;
+}
+
+@theme inline {
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-titre: var(--font-barlow), system-ui, sans-serif;
+}
+
+html {
+  color: var(--color-encre);
+  background: #ffffff;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-rouge);
+  outline-offset: 2px;
+}
