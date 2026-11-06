@@ -110,7 +110,8 @@ export async function confirmPhotos(requestId: string, paths: string[]) {
   if (Date.now() - new Date(request.received_at as string).getTime() > 30 * 60 * 1000) return { ok: false };
 
   const { data: objects } = await db.storage.from(BUCKET).list(requestId, { limit: MAX_PHOTOS + 5 });
-  const byName = new Map((objects ?? []).map((o) => [o.name, o]));
+  const byName = new Map<string, { metadata?: Record<string, unknown> | null }>();
+  for (const o of objects ?? []) byName.set(o.name, o);
 
   const rows = paths
     .filter((p) => typeof p === "string" && p.startsWith(`${requestId}/`))
