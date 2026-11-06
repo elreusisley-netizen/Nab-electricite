@@ -1,0 +1,41 @@
+name: Migrations Supabase
+
+# Applique automatiquement à la base Supabase chaque nouveau fichier de supabase/migrations/
+# dès qu'il arrive sur la branche main. Nécessite le secret SUPABASE_DB_URL
+# (GitHub > Settings > Secrets and variables > Actions).
+
+on:
+  push:
+    branches: [main]
+    paths: ["supabase/migrations/**", ".github/workflows/supabase-migrations.yml"]
+  workflow_dispatch:
+
+concurrency:
+  group: supabase-migrations
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Vérifier le secret
+        run: |
+          if [ -z "$SUPABASE_DB_URL" ]; then
+            echo "::error::Secret SUPABASE_DB_URL manquant (GitHub > Settings > Secrets and variables > Actions)."
+            exit 1
+          fi
+
+      # Le schéma initial a été installé à la main dans l'éditeur SQL : on l'indique une fois pour toutes.
+      - name: Schéma initial déjà installé
+        run: supabase migration repair --status applied 20261106000000 --db-url "$SUPABASE_DB_URL"
+
+      - name: Appliquer les nouvelles migrations
+        run: supabase db push --include-all --db-url "$SUPABASE_DB_URL"
