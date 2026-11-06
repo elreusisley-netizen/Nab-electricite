@@ -1,6 +1,8 @@
 import "server-only";
 import { cookies } from "next/headers";
-import { createServerClient } from "@supabase/ssr";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
+
+type CookieToSet = { name: string; value: string; options: CookieOptions };
 import { assertSupabaseEnv, supabasePublishableKey, supabaseUrl } from "@/lib/env";
 
 // Client lié à la session de l'utilisateur connecté : les politiques RLS s'appliquent.
@@ -13,7 +15,7 @@ export async function createClient() {
       getAll() {
         return cookieStore.getAll();
       },
-      setAll(cookiesToSet) {
+      setAll(cookiesToSet: CookieToSet[]) {
         try {
           cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
         } catch {
