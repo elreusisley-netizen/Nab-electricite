@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { FormComingSoon } from "@/components/site/FormComingSoon";
+import { DevisForm } from "@/components/forms/DevisForm";
+import type { RequestService } from "@/lib/labels";
 import { Container, Eyebrow, PageHero } from "@/components/site/ui";
 
 export const metadata: Metadata = {
@@ -15,7 +16,20 @@ const steps = [
   "Vos coordonnées",
 ];
 
-export default function DevisPage() {
+const fromSlug: Record<string, RequestService> = {
+  "installation-electrique-neuve": "installation_neuve",
+  "renovation-electrique": "renovation",
+  "mise-aux-normes-nf-c-15-100": "mise_aux_normes",
+  "tableau-electrique": "tableau_electrique",
+  videosurveillance: "videosurveillance",
+  interphonie: "interphonie",
+  vmc: "vmc",
+};
+
+export default async function DevisPage({ searchParams }: { searchParams: Promise<{ prestation?: string }> }) {
+  const { prestation } = await searchParams;
+  const initialService = prestation ? fromSlug[prestation] : undefined;
+
   return (
     <>
       <PageHero
@@ -38,7 +52,7 @@ export default function DevisPage() {
               ))}
             </ol>
           </div>
-          <FormComingSoon subject="devis" />
+          <DevisForm initialService={initialService} />
         </Container>
       </section>
     </>

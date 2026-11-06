@@ -60,7 +60,7 @@ export default async function ServicePage({ params }: Props) {
                 </>
               ) : (
                 <>
-                  <ButtonLink href="/devis">
+                  <ButtonLink href={`/devis?prestation=${service.slug}`}>
                     Demander un devis <Icon name="arrow" size={18} strokeWidth={2} />
                   </ButtonLink>
                   <ButtonLink href={company.phoneHref} variant="outline-light">

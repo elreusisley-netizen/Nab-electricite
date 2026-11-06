@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Icon } from "@/components/icons";
-import { FormComingSoon } from "@/components/site/FormComingSoon";
+import { DepannageForm } from "@/components/forms/DepannageForm";
 import { ButtonLink, Container, Eyebrow } from "@/components/site/ui";
 import { getCompany } from "@/lib/content";
 
@@ -42,7 +42,7 @@ export default function DepannagePage() {
               <li className="flex gap-3"><Icon name="check" size={22} strokeWidth={2} className="mt-0.5 flex-none text-rouge" />En cas de danger immédiat (incendie, personne électrisée), appelez le 18 ou le 112.</li>
             </ul>
           </div>
-          <FormComingSoon subject="dépannage" />
+          <DepannageForm />
         </Container>
       </section>
     </>

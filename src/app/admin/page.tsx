@@ -1,33 +1,47 @@
+import Link from "next/link";
+import { AdminHeader } from "@/components/admin/AdminHeader";
 import { requireAdmin } from "@/lib/auth";
-import { signOut } from "./actions";
 
-// Tableau de bord provisoire : construit en phase 4.
+// Tableau de bord provisoire : la version complète (carrousel, agenda, chiffre d'affaires) arrive en phase 4.
 export default async function AdminHomePage() {
   const { supabase, user } = await requireAdmin();
 
-  const { count: newRequests } = await supabase
-    .from("requests")
-    .select("id", { count: "exact", head: true })
-    .eq("status", "nouvelle");
+  const count = async (kind: "devis" | "depannage", urgentOnly = false) => {
+    let q = supabase.from("requests").select("id", { count: "exact", head: true }).eq("kind", kind).eq("status", "nouvelle");
+    if (urgentOnly) q = q.eq("urgency", "tres_urgente");
+    const { count: n } = await q;
+    return n ?? 0;
+  };
+  const [newDevis, newDepannages, urgent] = await Promise.all([count("devis"), count("depannage"), count("depannage", true)]);
+
+  const cards = [
+    { label: "Nouvelles demandes de devis", value: newDevis, href: "/admin/demandes?type=devis", alert: false },
+    { label: "Nouveaux dépannages", value: newDepannages, href: "/admin/demandes?type=depannage", alert: false },
+    { label: "Dépannages urgents", value: urgent, href: "/admin/demandes?type=depannage", alert: urgent > 0 },
+  ];
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-12">
-      <div className="flex items-center justify-between gap-4">
+    <>
+      <AdminHeader current="accueil" />
+      <main className="mx-auto max-w-4xl px-4 py-8">
         <h1 className="font-titre text-3xl font-bold text-nuit">Tableau de bord</h1>
-        <form action={signOut}>
-          <button type="submit" className="min-h-11 text-sm text-nuit underline">
-            Déconnexion
-          </button>
-        </form>
-      </div>
-      <p className="mt-2 text-discret">Connecté : {user.email}</p>
-      <section className="mt-8 rounded-xl border border-ligne bg-white p-6">
-        <p className="text-sm uppercase tracking-widest text-discret">Nouvelles demandes</p>
-        <p className="mt-2 font-titre text-4xl font-bold text-nuit">{newRequests ?? 0}</p>
-      </section>
-      <p className="mt-8 text-sm text-discret">
-        Espace en construction : agenda, demandes, devis et statistiques arrivent dans les prochaines phases.
-      </p>
-    </main>
+        <p className="mt-1 text-discret">Connecté : {user.email}</p>
+        <div className="mt-6 grid gap-4 sm:grid-cols-3">
+          {cards.map((c) => (
+            <Link
+              key={c.label}
+              href={c.href}
+              className={`rounded-xl border p-6 ${c.alert ? "border-rouge bg-rouge text-white" : "border-ligne bg-white text-nuit hover:border-nuit"}`}
+            >
+              <p className={`text-sm uppercase tracking-widest ${c.alert ? "text-white/85" : "text-discret"}`}>{c.label}</p>
+              <p className="mt-2 font-titre text-4xl font-bold">{c.value}</p>
+            </Link>
+          ))}
+        </div>
+        <p className="mt-8 text-sm text-discret">
+          Espace en construction : agenda, devis, clients et statistiques arrivent dans les prochaines phases.
+        </p>
+      </main>
+    </>
   );
 }
