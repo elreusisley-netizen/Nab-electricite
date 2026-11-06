@@ -27,7 +27,7 @@ export const company = {
   insuranceCoverage: null as string | null,
 };
 
-export const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://na-b.vercel.app").replace(/\/$/, "");
+export const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://nabelec.fr").replace(/\/$/, "");
 
 export const mainNav = [
   { href: "/", label: "Accueil" },
