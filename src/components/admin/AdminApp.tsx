@@ -6,17 +6,18 @@ import { todayISO } from "@/lib/admin/dates";
 import { createAdminStore, type AdminStore } from "@/lib/admin/store";
 import { emptySlot, type AgendaItem, type RequestItem, type SlotInput } from "@/lib/admin/types";
 import type { RequestStatus } from "@/lib/labels";
+import { AccountsView } from "./AccountsView";
 import { AgendaView } from "./AgendaView";
 import { RequestsView } from "./RequestsView";
 import { SlotSheet } from "./SlotSheet";
 import { StatsView } from "./StatsView";
 
-type View = "agenda" | "demandes" | "statistiques";
+type View = "agenda" | "demandes" | "statistiques" | "comptes";
 
 function readView(): View {
   if (typeof window === "undefined") return "agenda";
   const v = new URLSearchParams(window.location.search).get("vue");
-  return v === "demandes" || v === "statistiques" ? v : "agenda";
+  return v === "demandes" || v === "statistiques" || v === "comptes" ? v : "agenda";
 }
 
 function toInput(item: AgendaItem): SlotInput {
@@ -176,7 +177,7 @@ export function AdminApp({ email }: { email: string }) {
         <div className="mx-auto flex h-15 max-w-6xl items-center justify-between gap-4 px-4 md:h-17 md:px-8">
           <div className="flex items-center gap-3">
             <Image src="/images/logo-ampoule.png" alt="Électricité N.A.B." width={40} height={38} className="h-10 w-auto" />
-            <span className="font-titre text-2xl leading-none font-bold text-nuit">{tabs.find((t) => t.key === view)?.label}</span>
+            <span className="font-titre text-2xl leading-none font-bold text-nuit">{view === "comptes" ? "Comptes" : tabs.find((t) => t.key === view)?.label}</span>
           </div>
           <nav aria-label="Sections" className="hidden items-center gap-1 md:flex">
             {tabs.map((t) => (
@@ -200,6 +201,14 @@ export function AdminApp({ email }: { email: string }) {
               className="hidden min-h-10 rounded-full bg-nuit px-5 text-sm text-white md:inline-flex md:items-center"
             >
               + Nouvelle intervention
+            </button>
+            <button
+              type="button"
+              onClick={() => goto("comptes")}
+              aria-current={view === "comptes" ? "page" : undefined}
+              className={`min-h-10 text-sm underline-offset-4 ${view === "comptes" ? "font-semibold text-nuit underline" : "text-discret underline"}`}
+            >
+              Comptes
             </button>
             <button type="button" onClick={signOut} className="min-h-10 text-sm text-discret underline underline-offset-4" title={email}>
               Déconnexion
@@ -248,6 +257,8 @@ export function AdminApp({ email }: { email: string }) {
           </>
         ) : view === "demandes" ? (
           <RequestsView requests={requests} onStatus={setStatus} onSchedule={schedule} />
+        ) : view === "comptes" ? (
+          <AccountsView onToast={setToast} />
         ) : (
           <StatsView store={store} requests={requests} />
         )}
