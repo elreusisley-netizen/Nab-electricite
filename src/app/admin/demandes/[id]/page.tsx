@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { AdminHeader } from "@/components/admin/AdminHeader";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { Icon } from "@/components/icons";
 import { requireAdmin } from "@/lib/auth";
@@ -80,10 +79,9 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
 
   return (
     <>
-      <AdminHeader current="demandes" />
       <main className="mx-auto max-w-4xl px-4 py-8">
-        <Link href={`/admin/demandes?type=${r.kind}`} className="text-sm text-discret underline">
-          ← Toutes les demandes {r.kind === "devis" ? "de devis" : "de dépannage"}
+        <Link href="/admin?vue=demandes" className="inline-flex min-h-11 items-center text-sm text-discret underline">
+          ← Retour aux demandes
         </Link>
 
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
@@ -162,7 +160,7 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
               Enregistrer
             </button>
           </form>
-          <p className="mt-3 text-sm text-discret">« Créer le devis » à partir de cette demande arrivera avec le générateur de devis (phase 6).</p>
+          <p className="mt-3 text-sm text-discret">Pour planifier une intervention à partir de cette demande, utilisez « Planifier » dans l'onglet Demandes.</p>
         </section>
       </main>
     </>
