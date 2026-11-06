@@ -35,7 +35,7 @@ jobs:
 
       # Le schéma initial a été installé à la main dans l'éditeur SQL : on l'indique une fois pour toutes.
       - name: Schéma initial déjà installé
-        run: supabase migration repair --status applied 20261106000000 --db-url "$SUPABASE_DB_URL"
+        run: supabase migration repair --status applied 20261106000000 --remote="$SUPABASE_DB_URL" --yes
 
       - name: Appliquer les nouvelles migrations
-        run: supabase db push --include-all --db-url "$SUPABASE_DB_URL"
+        run: supabase db push --include-all --remote="$SUPABASE_DB_URL" --yes
